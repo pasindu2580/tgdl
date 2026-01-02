@@ -471,7 +471,6 @@ async def get_speed_test_info():
         def run_speed_test():
             try:
                 st = speedtest.Speedtest()
-                st.get_best_servers()
                 download = st.download() / 1_000_000
                 upload = st.upload() / 1_000_000
                 return f"📥 Download: {download:.2f} Mbps\n📤 Upload: {upload:.2f} Mbps"
