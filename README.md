@@ -112,8 +112,8 @@ A powerful Telegram bot that runs on Google Colab to download files from various
 |---------|-------------|
 | `/start` | Bot introduction with welcome image 👋 |
 | `/about` | Display bot info, version & developers info 📱 |
-| `/speed-test` | Run Colab speed test (download/upload) 📊 |
-| `/system-info` | Display current system resources (CPU/RAM/GPU) 💻 |
+| `/speedtest` | Run Colab speed test (download/upload) 📊 |
+| `/systeminfo` | Display current system resources (CPU/RAM/GPU) 💻 |
 | `/help` | Show complete help guide with all features |
 
 ### Configuration Options
