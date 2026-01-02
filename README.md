@@ -105,8 +105,16 @@ A powerful Telegram bot that runs on Google Colab to download files from various
 | `/setname <filename.ext>` | Set custom output filename |
 | `/zipaswd <password>` | Set password for zip compression 🔐 |
 | `/unzipaswd <password>` | Set password for extraction 🔓 |
-| `/help` | Show all commands and examples |
-| `/start` | Bot introduction and links |
+
+### Information & Utilities
+
+| Command | Description |
+|---------|-------------|
+| `/start` | Bot introduction with welcome image 👋 |
+| `/about` | Display bot info, version & developers info 📱 |
+| `/speedtest` | Run Colab speed test (download/upload) 📊 |
+| `/systeminfo` | Display current system resources (CPU/RAM/GPU) 💻 |
+| `/help` | Show complete help guide with all features |
 
 ### Configuration Options
 
@@ -289,4 +297,5 @@ MIT — See LICENSE file in repository
 - **[XronTrix10](https://github.com/XronTrix10/Telegram-Leecher)** — Original creator and main developer
 - **[kjeymax](https://github.com/kjeymax/Telegram-Leecher)** — Bug fixes and minor improvements
 - **[ehraz786](https://github.com/ehraz786/tgdl)** — Bug fixes and minor improvements
+
 

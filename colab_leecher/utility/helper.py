@@ -2,16 +2,17 @@ import os
 import math
 import psutil
 import logging
+import platform
 from time import time
+from asyncio import sleep, get_event_loop
 from PIL import Image
 from os import path as ospath
 from datetime import datetime
 from urllib.parse import urlparse
-from asyncio import get_event_loop
-from colab_leecher import colab_bot
-from pyrogram.errors import BadRequest
 from moviepy.video.io.VideoFileClip import VideoFileClip
+from pyrogram.errors import BadRequest
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
+from colab_leecher import colab_bot
 from colab_leecher.utility.variables import (
     BOT,
     MSG,
@@ -426,3 +427,95 @@ def keyboard():
             [InlineKeyboardButton("Cancel ❌", callback_data="cancel")],
         ]
     )
+
+
+async def send_auto_delete_photo(client, chat_id, photo_path, caption, delete_after=15, show_close=True):
+    """Send a photo with caption that auto-deletes after specified seconds"""
+    keyboard = None
+    if show_close:
+        keyboard = InlineKeyboardMarkup(
+            [[InlineKeyboardButton("Close ✘", callback_data="close")]]
+        )
+    
+    try:
+        if not ospath.exists(photo_path):
+            logging.warning(f"Photo not found: {photo_path}. Sending text only.")
+            msg = await client.send_message(
+                chat_id=chat_id,
+                text=caption,
+                reply_markup=keyboard
+            )
+        else:
+            msg = await client.send_photo(
+                chat_id=chat_id,
+                photo=photo_path,
+                caption=caption,
+                reply_markup=keyboard
+            )
+        
+        await sleep(delete_after)
+        try:
+            await msg.delete()
+        except Exception as e:
+            logging.error(f"Error deleting message: {e}")
+    except Exception as e:
+        logging.error(f"Error sending photo: {e}")
+
+
+async def get_speed_test_info():
+    """Get Colab download/upload speeds using speedtest library"""
+    try:
+        import speedtest
+        loop = get_event_loop()
+        
+        def run_speed_test():
+            try:
+                st = speedtest.Speedtest()
+                download = st.download() / 1_000_000
+                upload = st.upload() / 1_000_000
+                return f"📥 Download: {download:.2f} Mbps\n📤 Upload: {upload:.2f} Mbps"
+            except Exception as e:
+                return f"⚠️ Speed test failed: {str(e)}"
+        
+        result = await loop.run_in_executor(None, run_speed_test)
+        return result
+    except ImportError:
+        logging.warning("speedtest-cli not installed")
+        return "⚠️ Install speedtest-cli: pip install speedtest-cli"
+
+
+async def get_system_info_detailed():
+    """Get detailed Colab system information"""
+    try:
+        ram_usage = psutil.Process(os.getpid()).memory_info().rss
+        disk_usage = psutil.disk_usage("/")
+        cpu_usage_percent = psutil.cpu_percent()
+        cpu_count = psutil.cpu_count()
+        
+        info = f"<b>🖥️ SYSTEM INFORMATION</b>\n\n"
+        info += f"<b>OS:</b> <code>{platform.system()} {platform.release()}</code>\n"
+        info += f"<b>Python:</b> <code>{platform.python_version()}</code>\n\n"
+        info += f"<b>📊 RESOURCES:</b>\n"
+        info += f"├<b>CPU Usage:</b> <code>{cpu_usage_percent}%</code> (<code>{cpu_count} cores</code>)\n"
+        info += f"├<b>RAM Usage:</b> <code>{sizeUnit(ram_usage)}</code>\n"
+        info += f"├<b>RAM Total:</b> <code>{sizeUnit(psutil.virtual_memory().total)}</code>\n"
+        info += f"├<b>Disk Free:</b> <code>{sizeUnit(disk_usage.free)}</code>\n"
+        info += f"╰<b>Disk Total:</b> <code>{sizeUnit(disk_usage.total)}</code>\n\n"
+        
+        try:
+            import torch
+            if torch.cuda.is_available():
+                gpu_name = torch.cuda.get_device_name(0)
+                info += f"<b>🎮 GPU:</b> ✅ <code>{gpu_name}</code>\n"
+            else:
+                info += f"<b>🎮 GPU:</b> ❌ Not Available\n"
+        except ImportError:
+            info += f"<b>🎮 GPU:</b> ⚠️ PyTorch not installed\n"
+        except Exception as e:
+            logging.error(f"GPU detection error: {e}")
+            info += f"<b>🎮 GPU:</b> ❌ Error detecting GPU\n"
+        
+        return info
+    except Exception as e:
+        logging.error(f"System info error: {e}")
+        return f"⚠️ Error: {str(e)}"
