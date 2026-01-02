@@ -99,7 +99,7 @@ async def about(client, message):
         await message.reply_text(caption, reply_markup=keyboard)
 
 
-@colab_bot.on_message(filters.command("speed-test") & filters.private)
+@colab_bot.on_message(filters.command("speedtest") & filters.private)
 async def speed_test(client, message):
     await message.delete()
     msg = await message.reply_text("⏳ Running speed test... This may take a minute...")
@@ -132,7 +132,7 @@ async def speed_test(client, message):
         await message.reply_text(caption, reply_markup=keyboard)
 
 
-@colab_bot.on_message(filters.command("system-info") & filters.private)
+@colab_bot.on_message(filters.command("systeminfo") & filters.private)
 async def system_info(client, message):
     await message.delete()
     sys_info = await get_system_info_detailed()
@@ -572,8 +572,8 @@ async def help_command(client, message):
         "**ℹ️ INFORMATION COMMANDS:**\n\n"
         "🔹 /start - Bot introduction\n"
         "🔹 /about - Bot info & developers\n"
-        "🔹 /speed-test - Test Colab speeds 📊\n"
-        "🔹 /system-info - View system resources 💻\n"
+        "🔹 /speedtest - Test Colab speeds 📊\n"
+        "🔹 /systeminfo - View system resources 💻\n"
         "🔹 /help - Show this guide\n\n"
         "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
         "**📋 SUPPORTED SOURCES:**\n\n"
