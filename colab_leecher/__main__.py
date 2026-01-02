@@ -41,7 +41,7 @@ async def start(client, message):
     
     try:
         import os.path as ospath
-        welcome_photo = ospath.join(os.path.dirname(os.path.dirname(__file__)), "static/welcome.jpg")
+        welcome_photo = ospath.join(os.path.dirname(os.path.dirname(__file__)), "colab_leecher/static/welcome.jpg")
         msg = await client.send_photo(
             chat_id=message.chat.id,
             photo=welcome_photo,
@@ -60,7 +60,7 @@ async def about(client, message):
     await message.delete()
     caption = (
         "<b>📱 COLAB LEECHER - BOT INFO</b>\n\n"
-        "<b>Version:</b> <code>2.0.0</code>\n"
+        "<b>Version:</b> <code>1.0.2</code>\n"
         "<b>Status:</b> <code>Active & Maintained</code>\n\n"
         "<b>👨‍💻 DEVELOPERS:</b>\n"
         "├ <b>Original Creator:</b> XronTrix10\n"
@@ -85,7 +85,7 @@ async def about(client, message):
     
     try:
         import os.path as ospath
-        about_photo = ospath.join(os.path.dirname(os.path.dirname(__file__)), "static/about.jpg")
+        about_photo = ospath.join(os.path.dirname(os.path.dirname(__file__)), "colab_leecher/static/about.jpg")
         msg = await client.send_photo(
             chat_id=message.chat.id,
             photo=about_photo,
@@ -118,7 +118,7 @@ async def speed_test(client, message):
     try:
         await msg.delete()
         import os.path as ospath
-        speedtest_photo = ospath.join(os.path.dirname(os.path.dirname(__file__)), "static/speedtest.jpg")
+        speedtest_photo = ospath.join(os.path.dirname(os.path.dirname(__file__)), "colab_leecher/static/speedtest.jpg")
         result_msg = await client.send_photo(
             chat_id=message.chat.id,
             photo=speedtest_photo,
@@ -143,7 +143,7 @@ async def system_info(client, message):
     
     try:
         import os.path as ospath
-        sysinfo_photo = ospath.join(os.path.dirname(os.path.dirname(__file__)), "static/systeminfo.jpg")
+        sysinfo_photo = ospath.join(os.path.dirname(os.path.dirname(__file__)), "colab_leecher/static/systeminfo.jpg")
         msg = await client.send_photo(
             chat_id=message.chat.id,
             photo=sysinfo_photo,
