@@ -7,7 +7,15 @@ from colab_leecher.utility.handler import cancelTask
 from .utility.variables import BOT, MSG, BotTimes, Paths
 from .utility.task_manager import taskScheduler, task_starter
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from .utility.helper import isLink, setThumbnail, message_deleter, send_settings
+from .utility.helper import (
+    isLink,
+    setThumbnail,
+    message_deleter,
+    send_settings,
+    send_auto_delete_photo,
+    get_speed_test_info,
+    get_system_info_detailed,
+)
 
 
 src_request_msg = None
@@ -16,7 +24,8 @@ src_request_msg = None
 @colab_bot.on_message(filters.command("start") & filters.private)
 async def start(client, message):
     await message.delete()
-    text = "**Hey There, 👋🏼 It's Colab Leecher**\n\n◲ I am a Powerful File Transloading Bot 🚀\n◲ I can Transfer Files To Telegram or Your Google Drive From Various Sources 🦐"
+    caption = "**Hey There, 👋🏼 It's Colab Leecher**\n\n◲ I am a Powerful File Transloading Bot 🚀\n◲ I can Transfer Files To Telegram or Your Google Drive From Various Sources 🦐"
+    
     keyboard = InlineKeyboardMarkup(
         [
             [
@@ -26,9 +35,126 @@ async def start(client, message):
                 ),
                 InlineKeyboardButton("Support 💝", url="https://t.me/Colab_Leecher"),
             ],
+            [InlineKeyboardButton("Close ✘", callback_data="close")],
         ]
     )
-    await message.reply_text(text, reply_markup=keyboard)
+    
+    try:
+        import os.path as ospath
+        welcome_photo = ospath.join(os.path.dirname(os.path.dirname(__file__)), "static/welcome.jpg")
+        msg = await client.send_photo(
+            chat_id=message.chat.id,
+            photo=welcome_photo,
+            caption=caption,
+            reply_markup=keyboard
+        )
+        await sleep(15)
+        await msg.delete()
+    except Exception as e:
+        logging.error(f"Error sending welcome photo: {e}")
+        await message.reply_text(caption, reply_markup=keyboard)
+
+
+@colab_bot.on_message(filters.command("about") & filters.private)
+async def about(client, message):
+    await message.delete()
+    caption = (
+        "<b>📱 COLAB LEECHER - BOT INFO</b>\n\n"
+        "<b>Version:</b> <code>2.0.0</code>\n"
+        "<b>Status:</b> <code>Active & Maintained</code>\n\n"
+        "<b>👨‍💻 DEVELOPERS:</b>\n"
+        "├ <b>Original Creator:</b> XronTrix10\n"
+        "├ <b>Current Maintainer:</b> Pasindu Dilsan\n"
+        "└ <b>Contributors:</b> kjeymax, ehraz786\n\n"
+        "<b>🔗 LINKS:</b>\n"
+        "├ GitHub: github.com/pasindu2580/tgdl\n"
+        "├ Channel: @Colab_Leecher\n"
+        "└ Discussion: @Colab_Leecher_Discuss\n\n"
+        "<b>✨ FEATURES:</b>\n"
+        "✅ Multi-source downloads\n"
+        "✅ Video conversion & splitting\n"
+        "✅ Archive compression\n"
+        "✅ Google Drive mirror\n"
+        "✅ Real-time progress tracking\n"
+        "✅ Password-protected files"
+    )
+    
+    keyboard = InlineKeyboardMarkup(
+        [[InlineKeyboardButton("Close ✘", callback_data="close")]]
+    )
+    
+    try:
+        import os.path as ospath
+        about_photo = ospath.join(os.path.dirname(os.path.dirname(__file__)), "static/about.jpg")
+        msg = await client.send_photo(
+            chat_id=message.chat.id,
+            photo=about_photo,
+            caption=caption,
+            reply_markup=keyboard
+        )
+        await sleep(30)
+        await msg.delete()
+    except Exception as e:
+        logging.error(f"Error sending about photo: {e}")
+        await message.reply_text(caption, reply_markup=keyboard)
+
+
+@colab_bot.on_message(filters.command("speed-test") & filters.private)
+async def speed_test(client, message):
+    await message.delete()
+    msg = await message.reply_text("⏳ Running speed test... This may take a minute...")
+    
+    speed_info = await get_speed_test_info()
+    caption = (
+        "<b>🚀 COLAB SPEED TEST</b>\n\n"
+        f"{speed_info}\n\n"
+        f"<b>⏱️ Tested:</b> <code>{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</code>"
+    )
+    
+    keyboard = InlineKeyboardMarkup(
+        [[InlineKeyboardButton("Close ✘", callback_data="close")]]
+    )
+    
+    try:
+        await msg.delete()
+        import os.path as ospath
+        speedtest_photo = ospath.join(os.path.dirname(os.path.dirname(__file__)), "static/speedtest.jpg")
+        result_msg = await client.send_photo(
+            chat_id=message.chat.id,
+            photo=speedtest_photo,
+            caption=caption,
+            reply_markup=keyboard
+        )
+        await sleep(30)
+        await result_msg.delete()
+    except Exception as e:
+        logging.error(f"Error sending speed test photo: {e}")
+        await message.reply_text(caption, reply_markup=keyboard)
+
+
+@colab_bot.on_message(filters.command("system-info") & filters.private)
+async def system_info(client, message):
+    await message.delete()
+    sys_info = await get_system_info_detailed()
+    
+    keyboard = InlineKeyboardMarkup(
+        [[InlineKeyboardButton("Close ✘", callback_data="close")]]
+    )
+    
+    try:
+        import os.path as ospath
+        sysinfo_photo = ospath.join(os.path.dirname(os.path.dirname(__file__)), "static/systeminfo.jpg")
+        msg = await client.send_photo(
+            chat_id=message.chat.id,
+            photo=sysinfo_photo,
+            caption=sys_info,
+            reply_markup=keyboard
+        )
+        await sleep(30)
+        await msg.delete()
+    except Exception as e:
+        logging.error(f"Error sending system info photo: {e}")
+        await message.reply_text(sys_info, reply_markup=keyboard)
 
 
 @colab_bot.on_message(filters.command("tupload") & filters.private)
@@ -316,7 +442,10 @@ async def handle_options(client, callback_query):
         )
 
     elif callback_query.data == "close":
-        await callback_query.message.delete()
+        try:
+            await callback_query.message.delete()
+        except Exception as e:
+            logging.error(f"Error closing message: {e}")
     elif callback_query.data == "back":
         await send_settings(
             client, callback_query.message, callback_query.message.id, False
@@ -440,6 +569,13 @@ async def help_command(client, message):
         "🔹 /zipaswd <password> - Set password for zip 🔐\n"
         "🔹 /unzipaswd <password> - Set password for extraction 🔓\n\n"
         "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        "**ℹ️ INFORMATION COMMANDS:**\n\n"
+        "🔹 /start - Bot introduction\n"
+        "🔹 /about - Bot info & developers\n"
+        "🔹 /speed-test - Test Colab speeds 📊\n"
+        "🔹 /system-info - View system resources 💻\n"
+        "🔹 /help - Show this guide\n\n"
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
         "**📋 SUPPORTED SOURCES:**\n\n"
         "✅ HTTP/HTTPS Links (Aria2c)\n"
         "✅ YouTube & YTDL Playlists\n"
@@ -457,7 +593,9 @@ async def help_command(client, message):
         "✨ Custom Thumbnails for uploads\n"
         "✨ Real-time Progress Updates\n"
         "✨ Task Cancellation\n"
-        "✨ Colab Resource Monitoring\n\n"
+        "✨ Colab Resource Monitoring\n"
+        "✨ Speed Testing\n"
+        "✨ System Information Display\n\n"
         "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
         "**💡 USAGE PATTERN:**\n\n"
         "<code>https://link1.mp4\n"
