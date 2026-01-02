@@ -8,7 +8,7 @@ moviepy
 natsort
 opencv-python
 Pillow
-psutil
+psutil>=5.9.0
 pytz
 pyrofork==2.2.11
 requests
@@ -16,3 +16,4 @@ tgcrypto
 uvloop
 yt_dlp
 pymegatools
+speedtest-cli==2.1.3
