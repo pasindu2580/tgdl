@@ -471,9 +471,22 @@ async def get_speed_test_info():
         def run_speed_test():
             try:
                 st = speedtest.Speedtest()
-                download = st.download() / 1_000_000
-                upload = st.upload() / 1_000_000
-                return f"📥 Download: {download:.2f} Mbps\n📤 Upload: {upload:.2f} Mbps"
+                st.get_best_server()
+                st.download()
+                st.upload()
+                results = st.results.dict()
+                
+                client_info = results.get("client", {})
+                
+                return (
+                    f'<b>SPEEDTEST RESULTS</b>\n\n'
+                    f'<b>ISP:</b> <code>{client_info.get("isp", "N/A")}</code>\n'
+                    f'<b>Country:</b> <code>{client_info.get("country", "N/A")}</code>\n'
+                    f'<b>IP Address:</b> <code>{client_info.get("ip", "N/A")}</code>\n\n'
+                    f'<b>📥 Download:</b> <code>{results["download"] / 1_000_000:.2f} Mbps</code>\n'
+                    f'<b>📤 Upload:</b> <code>{results["upload"] / 1_000_000:.2f} Mbps</code>\n'
+                    f'<b>🐢 Ping:</b> <code>{results["ping"]:.2f} ms</code>'
+                )
             except Exception as e:
                 return f"⚠️ Speed test failed: {str(e)}"
         
@@ -487,20 +500,42 @@ async def get_speed_test_info():
 async def get_system_info_detailed():
     """Get detailed Colab system information"""
     try:
-        ram_usage = psutil.Process(os.getpid()).memory_info().rss
-        disk_usage = psutil.disk_usage("/")
+        # System Uptime
+        boot_time_timestamp = psutil.boot_time()
+        bt = datetime.fromtimestamp(boot_time_timestamp)
+        uptime = datetime.now() - bt
+        
+        # CPU Info
         cpu_usage_percent = psutil.cpu_percent()
-        cpu_count = psutil.cpu_count()
+        cpu_count = psutil.cpu_count(logical=True)
+        cpu_freq = psutil.cpu_freq()
+        
+        # Memory Info
+        ram = psutil.virtual_memory()
+        
+        # Disk Info
+        disk_usage = psutil.disk_usage("/")
         
         info = f"<b>🖥️ SYSTEM INFORMATION</b>\n\n"
         info += f"<b>OS:</b> <code>{platform.system()} {platform.release()}</code>\n"
-        info += f"<b>Python:</b> <code>{platform.python_version()}</code>\n\n"
-        info += f"<b>📊 RESOURCES:</b>\n"
-        info += f"├<b>CPU Usage:</b> <code>{cpu_usage_percent}%</code> (<code>{cpu_count} cores</code>)\n"
-        info += f"├<b>RAM Usage:</b> <code>{sizeUnit(ram_usage)}</code>\n"
-        info += f"├<b>RAM Total:</b> <code>{sizeUnit(psutil.virtual_memory().total)}</code>\n"
-        info += f"├<b>Disk Free:</b> <code>{sizeUnit(disk_usage.free)}</code>\n"
-        info += f"╰<b>Disk Total:</b> <code>{sizeUnit(disk_usage.total)}</code>\n\n"
+        info += f"<b>Python:</b> <code>{platform.python_version()}</code>\n"
+        info += f"<b>Uptime:</b> <code>{str(uptime).split('.')[0]}</code>\n"
+        info += f"<b>Booted on:</b> <code>{bt.strftime('%Y-%m-%d %H:%M:%S')}</code>\n\n"
+        
+        info += f"<b>📊 CPU:</b>\n"
+        info += f"├<b>Usage:</b> <code>{cpu_usage_percent}%</code>\n"
+        if cpu_freq:
+            info += f"├<b>Frequency:</b> <code>{cpu_freq.current:.2f} Mhz</code>\n"
+        info += f"╰<b>Cores:</b> <code>{cpu_count}</code>\n\n"
+        
+        info += f"<b>💾 MEMORY:</b>\n"
+        info += f"├<b>Used:</b> <code>{sizeUnit(ram.used)}</code> (<code>{ram.percent}%</code>)\n"
+        info += f"╰<b>Total:</b> <code>{sizeUnit(ram.total)}</code>\n\n"
+        
+        info += f"<b>💽 DISK:</b>\n"
+        info += f"├<b>Used:</b> <code>{sizeUnit(disk_usage.used)}</code>\n"
+        info += f"├<b>Free:</b> <code>{sizeUnit(disk_usage.free)}</code>\n"
+        info += f"╰<b>Total:</b> <code>{sizeUnit(disk_usage.total)}</code>\n\n"
         
         try:
             import torch
